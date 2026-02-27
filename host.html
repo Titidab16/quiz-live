@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hôte - QuizLive</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ÉCRAN 1 : Créer le quiz -->
+    <div id="screen-create" class="screen active">
+        <div class="host-container">
+            <h1>📝 Crée ton Quiz</h1>
+
+            <!-- ✅ IMPORT / EXPORT -->
+            <div class="import-export-bar">
+                <button onclick="exportQuiz()" class="btn btn-blue">
+                    📤 Exporter le quiz
+                </button>
+                <label class="btn btn-purple" for="import-file">
+                    📥 Importer un quiz
+                </label>
+                <input 
+                    type="file" 
+                    id="import-file" 
+                    accept=".json"
+                    style="display:none"
+                    onchange="importQuiz(event)"
+                >
+            </div>
+
+            <div id="questions-list"></div>
+
+            <div class="question-form">
+                <h3>➕ Ajouter une question</h3>
+
+                <input 
+                    type="text" 
+                    id="q-text" 
+                    placeholder="La question..."
+                    class="input-full"
+                >
+
+                <div class="answers-grid">
+                    <input type="text" id="a-0" placeholder="▲ Réponse 1" class="answer-input red">
+                    <input type="text" id="a-1" placeholder="♦ Réponse 2" class="answer-input blue">
+                    <input type="text" id="a-2" placeholder="● Réponse 3" class="answer-input green">
+                    <input type="text" id="a-3" placeholder="■ Réponse 4" class="answer-input yellow">
+                </div>
+
+                <div class="correct-select">
+                    <label>✅ Bonne réponse :</label>
+                    <select id="correct-answer">
+                        <option value="0">▲ Réponse 1</option>
+                        <option value="1">♦ Réponse 2</option>
+                        <option value="2">● Réponse 3</option>
+                        <option value="3">■ Réponse 4</option>
+                    </select>
+                </div>
+
+                <div class="timer-select">
+                    <label>⏱️ Temps :</label>
+                    <select id="q-timer">
+                        <option value="10">10 secondes</option>
+                        <option value="20" selected>20 secondes</option>
+                        <option value="30">30 secondes</option>
+                        <option value="60">60 secondes</option>
+                    </select>
+                </div>
+
+                <div class="points-select">
+                    <label>🏆 Points pour cette question :</label>
+                    <div class="points-buttons">
+                        <button type="button" class="point-btn active" data-points="100" onclick="selectPoints(this)">100</button>
+                        <button type="button" class="point-btn" data-points="200" onclick="selectPoints(this)">200</button>
+                        <button type="button" class="point-btn" data-points="500" onclick="selectPoints(this)">500</button>
+                        <button type="button" class="point-btn" data-points="1000" onclick="selectPoints(this)">1000</button>
+                    </div>
+                    <div class="points-custom">
+                        <input 
+                            type="number" 
+                            id="q-points" 
+                            value="100" 
+                            min="1" 
+                            max="9999"
+                            placeholder="Valeur personnalisée"
+                        >
+                        <span>pts</span>
+                    </div>
+                </div>
+
+                <button onclick="addQuestion()" class="btn btn-orange">
+                    ➕ Ajouter la question
+                </button>
+            </div>
+
+            <button onclick="startLobby()" class="btn btn-green btn-big" id="start-btn" disabled>
+                🚀 Lancer la partie
+            </button>
+        </div>
+    </div>
+
+    <!-- ÉCRAN 2 : Salle d'attente -->
+    <div id="screen-lobby" class="screen">
+        <div class="lobby-container">
+            <h1>🎮 Salle d'attente</h1>
+
+            <div class="pin-display">
+                <p>PIN de la partie :</p>
+                <div class="pin-number" id="pin-display">------</div>
+                <p class="pin-hint">Les joueurs entrent ce code sur la page d'accueil</p>
+            </div>
+
+            <div class="players-section">
+                <h3>👥 Joueurs connectés (<span id="player-count">0</span>)</h3>
+                <div id="players-grid" class="players-grid"></div>
+            </div>
+
+            <button onclick="launchGame()" class="btn btn-green btn-big">
+                ▶️ Démarrer le quiz !
+            </button>
+        </div>
+    </div>
+
+    <!-- ÉCRAN 3 : Question en cours -->
+    <div id="screen-question" class="screen">
+        <div class="question-screen">
+
+            <div class="question-header">
+                <span id="q-counter">Question 1/5</span>
+                <div class="timer-circle">
+                    <span id="timer-display">20</span>
+                </div>
+                <span id="q-score-count">0 réponses</span>
+            </div>
+
+            <div class="question-points-badge">
+                <span>🏆</span>
+                <span id="current-q-points">100</span>
+                <span>pts</span>
+            </div>
+
+            <div class="question-box">
+                <h2 id="current-question">La question apparaît ici...</h2>
+            </div>
+
+            <div class="answers-display">
+                <div class="answer-box red">
+                    <span>▲</span>
+                    <p id="host-a-0"></p>
+                    <span class="answer-count" id="count-0">0</span>
+                </div>
+                <div class="answer-box blue">
+                    <span>♦</span>
+                    <p id="host-a-1"></p>
+                    <span class="answer-count" id="count-1">0</span>
+                </div>
+                <div class="answer-box green">
+                    <span>●</span>
+                    <p id="host-a-2"></p>
+                    <span class="answer-count" id="count-2">0</span>
+                </div>
+                <div class="answer-box yellow">
+                    <span>■</span>
+                    <p id="host-a-3"></p>
+                    <span class="answer-count" id="count-3">0</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ÉCRAN 4 : Résultats entre questions -->
+    <div id="screen-results" class="screen">
+        <div class="results-container">
+            <h2>📊 Résultats</h2>
+            <div id="scoreboard" class="scoreboard"></div>
+            <button onclick="nextQuestion()" class="btn btn-orange btn-big" id="next-btn">
+                ➡️ Question suivante
+            </button>
+        </div>
+    </div>
+
+    <!-- ÉCRAN 5 : Fin du jeu -->
+    <div id="screen-end" class="screen">
+        <div class="end-container">
+            <h1>🏆 Fin du Quiz !</h1>
+            <div id="final-scores" class="final-scores"></div>
+            <button onclick="window.location.href='index.html'" class="btn btn-green btn-big">
+                🏠 Retour à l'accueil
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script>
+        function selectPoints(btn) {
+            document.querySelectorAll('.point-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('q-points').value = btn.dataset.points;
+        }
+
+        document.getElementById('q-points').addEventListener('input', () => {
+            document.querySelectorAll('.point-btn').forEach(b => b.classList.remove('active'));
+        });
+    </script>
+    <script src="js/host.js"></script>
+
+</body>
+</html>

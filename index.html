@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizLive 🎮</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="home-container">
+        <div class="logo">
+            <h1>🎮 QuizLive</h1>
+            <p>Le quiz multijoueur 100% gratuit !</p>
+        </div>
+
+        <div class="home-cards">
+
+            <!-- Carte Rejoindre -->
+            <div class="card card-join">
+                <div class="card-icon">🎯</div>
+                <h2>Rejoindre</h2>
+                <p>Entre le PIN de la partie</p>
+                <div class="pin-input-group">
+                    <input 
+                        type="text" 
+                        id="pin-input" 
+                        placeholder="PIN à 6 chiffres"
+                        maxlength="6"
+                    >
+                    <input 
+                        type="text" 
+                        id="name-input" 
+                        placeholder="Ton pseudo"
+                        maxlength="15"
+                    >
+                    <button onclick="joinGame()" class="btn btn-green">
+                        Rejoindre →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Carte Créer -->
+            <div class="card card-host">
+                <div class="card-icon">➕</div>
+                <h2>Créer un Quiz</h2>
+                <p>Lance ta propre partie</p>
+                <a href="host.html" class="btn btn-orange">
+                    Créer →
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Bandeau info système de points -->
+        <div class="points-info-banner">
+            <span>🏆</span>
+            <span>Système de points : chaque question vaut un nombre de points défini par l'hôte !</span>
+            <span>⚡</span>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script>
+        function joinGame() {
+            const pin = document.getElementById('pin-input').value.trim();
+            const name = document.getElementById('name-input').value.trim();
+
+            if (pin.length !== 6) {
+                alert('❌ Le PIN doit avoir 6 chiffres !');
+                return;
+            }
+            if (name.length < 2) {
+                alert('❌ Entre ton pseudo !');
+                return;
+            }
+
+            // Rediriger vers la page joueur
+            window.location.href = `play.html?pin=${pin}&name=${encodeURIComponent(name)}`;
+        }
+
+        // Permettre de valider avec Entrée
+        document.getElementById('pin-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinGame();
+        });
+        document.getElementById('name-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinGame();
+        });
+    </script>
+
+</body>
+</html>
