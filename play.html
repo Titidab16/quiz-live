@@ -31,7 +31,7 @@
 
     <!-- ÉCRAN 3 : Question -->
     <div id="screen-play" class="screen">
-        
+
         <div class="player-header">
             <span id="player-score-display">0 pts</span>
             <div class="player-timer" id="player-timer">20</div>
@@ -42,21 +42,28 @@
         </div>
 
         <div class="player-answers" id="player-answers">
-            <button class="player-answer-btn red"   id="btn-0" onclick="sendAnswer(0)">
+            <button class="player-answer-btn red"    id="btn-0" onclick="toggleAnswer(0)">
                 <span class="btn-icon">▲</span>
                 <span id="player-a-0">Réponse 1</span>
             </button>
-            <button class="player-answer-btn blue"  id="btn-1" onclick="sendAnswer(1)">
+            <button class="player-answer-btn blue"   id="btn-1" onclick="toggleAnswer(1)">
                 <span class="btn-icon">♦</span>
                 <span id="player-a-1">Réponse 2</span>
             </button>
-            <button class="player-answer-btn green" id="btn-2" onclick="sendAnswer(2)">
+            <button class="player-answer-btn green"  id="btn-2" onclick="toggleAnswer(2)">
                 <span class="btn-icon">●</span>
                 <span id="player-a-2">Réponse 3</span>
             </button>
-            <button class="player-answer-btn yellow" id="btn-3" onclick="sendAnswer(3)">
+            <button class="player-answer-btn yellow" id="btn-3" onclick="toggleAnswer(3)">
                 <span class="btn-icon">■</span>
                 <span id="player-a-3">Réponse 4</span>
+            </button>
+        </div>
+
+        <!-- Bouton Valider -->
+        <div style="display:flex; justify-content:center; margin-top:20px;">
+            <button id="validate-btn" onclick="validateAnswers()">
+                ✅ Valider ma sélection
             </button>
         </div>
 

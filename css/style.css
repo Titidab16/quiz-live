@@ -646,3 +646,32 @@ body {
     .points-buttons    { gap: 6px; }
     .point-btn         { padding: 8px 14px; font-size: 1em; }
 }
+/* ===== BOUTON VALIDER ===== */
+#validate-btn {
+    display: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: 10px;
+}
+
+#validate-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+}
+
+#validate-btn:active {
+    transform: scale(0.96);
+}
+
+/* ===== BOUTON SÉLECTIONNÉ ===== */
+.player-answer-btn {
+    transition: transform 0.1s, outline 0.1s, opacity 0.2s;
+}

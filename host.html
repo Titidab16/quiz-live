@@ -50,13 +50,21 @@
                 </div>
 
                 <div class="correct-select">
-                    <label>✅ Bonne réponse :</label>
-                    <select id="correct-answer">
-                        <option value="0">▲ Réponse 1</option>
-                        <option value="1">♦ Réponse 2</option>
-                        <option value="2">● Réponse 3</option>
-                        <option value="3">■ Réponse 4</option>
-                    </select>
+                    <label>✅ Bonnes réponses (plusieurs possibles) :</label>
+                    <div class="correct-checkboxes">
+                        <label class="check-label red">
+                            <input type="checkbox" name="correct" value="0"> ▲ Réponse 1
+                        </label>
+                        <label class="check-label blue">
+                            <input type="checkbox" name="correct" value="1"> ♦ Réponse 2
+                        </label>
+                        <label class="check-label green">
+                            <input type="checkbox" name="correct" value="2"> ● Réponse 3
+                        </label>
+                        <label class="check-label yellow">
+                            <input type="checkbox" name="correct" value="3"> ■ Réponse 4
+                        </label>
+                    </div>
                 </div>
 
                 <div class="timer-select">

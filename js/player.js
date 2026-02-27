@@ -1,34 +1,22 @@
-// ===== VARIABLES =====
+// ===== VARIABLES GLOBALES =====
 let peer;
 let hostConn;
 let playerName;
 let startTime;
 let playerScore = 0;
 let timerInterval;
+let selectedAnswers = [];   // réponses sélectionnées
+let answered = false;       // a-t-on déjà validé ?
 
-// ===== INITIALISATION =====
+// ===== CONNEXION =====
 
-window.addEventListener('load', () => {
+window.onload = () => {
     const params = new URLSearchParams(window.location.search);
-    const pin = params.get('pin');
-    playerName = params.get('name') || 'Joueur';
+    const pin    = params.get('pin');
+    playerName   = params.get('name') || 'Joueur';
 
     document.getElementById('player-name-display').textContent = playerName;
-
-    if (!pin) {
-        alert('❌ PIN manquant !');
-        window.location.href = 'index.html';
-        return;
-    }
-
-    connectToHost(pin);
-});
-
-// ===== CONNEXION À L'HÔTE =====
-
-function connectToHost(pin) {
-    document.getElementById('connect-status').textContent = 
-        `Connexion à la partie ${pin}...`;
+    document.getElementById('connect-status').textContent = `Connexion à la partie ${pin}...`;
 
     peer = new Peer();
 
@@ -36,57 +24,46 @@ function connectToHost(pin) {
         hostConn = peer.connect('quiz-' + pin);
 
         hostConn.on('open', () => {
-            // Envoyer son nom
             hostConn.send({ type: 'JOIN', name: playerName });
         });
 
-        hostConn.on('data', (data) => {
-            handleHostMessage(data);
-        });
+        hostConn.on('data', handleHostMessage);
 
         hostConn.on('close', () => {
-            alert('🔴 Connexion perdue avec l\'hôte !');
-            window.location.href = 'index.html';
-        });
-
-        hostConn.on('error', (err) => {
-            alert('❌ Impossible de rejoindre. PIN invalide ?');
+            alert('❌ Connexion perdue !');
             window.location.href = 'index.html';
         });
     });
 
-    peer.on('error', () => {
-        alert('❌ Erreur de connexion !');
+    peer.on('error', (err) => {
+        console.error(err);
+        alert('❌ Impossible de rejoindre la partie !');
         window.location.href = 'index.html';
     });
 
-    // Timeout si connexion trop longue
     setTimeout(() => {
         if (!hostConn || !hostConn.open) {
             alert('❌ Partie introuvable. Vérifie le PIN !');
             window.location.href = 'index.html';
         }
     }, 10000);
-}
+};
 
 // ===== MESSAGES DE L'HÔTE =====
 
 function handleHostMessage(data) {
     console.log('Message hôte:', data);
 
-    switch(data.type) {
+    switch (data.type) {
         case 'JOINED':
             showScreen('screen-wait');
             break;
-
         case 'QUESTION':
             showQuestion(data);
             break;
-
         case 'QUESTION_RESULT':
             showQuestionResult(data);
             break;
-
         case 'GAME_OVER':
             showGameOver(data);
             break;
@@ -96,96 +73,139 @@ function handleHostMessage(data) {
 // ===== AFFICHER UNE QUESTION =====
 
 function showQuestion(data) {
+    // Reset état
+    selectedAnswers = [];
+    answered        = false;
+
+    // Reset boutons
+    for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`btn-${i}`);
+        btn.disabled      = false;
+        btn.style.opacity = '1';
+        btn.style.outline = 'none';
+        btn.style.transform = 'scale(1)';
+        document.getElementById(`player-a-${i}`).textContent = data.answers[i];
+    }
+
+    // Cacher bouton valider
+    const validateBtn = document.getElementById('validate-btn');
+    validateBtn.style.display = 'none';
+
+    // Afficher question et score
+    document.getElementById('player-question-text').textContent = data.question;
+    document.getElementById('player-score-display').textContent = `${playerScore} pts`;
+
     showScreen('screen-play');
     startTime = Date.now();
+    startPlayerTimer(data.time);
+}
 
-    document.getElementById('player-question-text').textContent = data.question;
+// ===== TOGGLE RÉPONSE =====
 
-    // Afficher les réponses
-    data.answers.forEach((answer, i) => {
-        const btn = document.getElementById(`btn-${i}`);
-        document.getElementById(`player-a-${i}`).textContent = answer;
-        btn.disabled = false;
-        btn.style.opacity = '1';
+function toggleAnswer(index) {
+    if (answered) return;
+
+    const btn = document.getElementById(`btn-${index}`);
+    const pos = selectedAnswers.indexOf(index);
+
+    if (pos === -1) {
+        // Ajouter à la sélection
+        selectedAnswers.push(index);
+        btn.style.outline   = '4px solid white';
+        btn.style.transform = 'scale(0.95)';
+    } else {
+        // Retirer de la sélection
+        selectedAnswers.splice(pos, 1);
+        btn.style.outline   = 'none';
+        btn.style.transform = 'scale(1)';
+    }
+
+    // Afficher/cacher le bouton valider
+    const validateBtn = document.getElementById('validate-btn');
+    validateBtn.style.display = selectedAnswers.length > 0 ? 'block' : 'none';
+}
+
+// ===== VALIDER LES RÉPONSES =====
+
+function validateAnswers() {
+    if (answered || selectedAnswers.length === 0) return;
+    answered = true;
+
+    clearInterval(timerInterval);
+
+    const responseTime = (Date.now() - startTime) / 1000;
+
+    hostConn.send({
+        type:         'ANSWER',
+        answer:       [...selectedAnswers],
+        responseTime: responseTime
     });
 
-    // Mettre à jour le score
-    document.getElementById('player-score-display').textContent = 
-        `${playerScore} pts`;
+    // Désactiver tous les boutons
+    for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`btn-${i}`);
+        btn.disabled      = true;
+        btn.style.opacity = selectedAnswers.includes(i) ? '1' : '0.4';
+    }
 
-    // Lancer le timer
-    startPlayerTimer(data.time);
+    document.getElementById('validate-btn').style.display = 'none';
+    showScreen('screen-answered');
 }
 
 // ===== TIMER JOUEUR =====
 
 function startPlayerTimer(seconds) {
     clearInterval(timerInterval);
-    let timeLeft = seconds;
+    let timeLeft  = seconds;
     const timerEl = document.getElementById('player-timer');
-    timerEl.textContent = timeLeft;
+
+    timerEl.textContent          = timeLeft;
+    timerEl.style.background     = '#667eea';
+    timerEl.style.color          = 'white';
 
     timerInterval = setInterval(() => {
         timeLeft--;
         timerEl.textContent = timeLeft;
 
         if (timeLeft <= 5) {
-            timerEl.style.background = '#c0392b';
+            timerEl.style.background = '#e74c3c';
         }
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            // Temps écoulé sans réponse
-            disableButtons();
-            showScreen('screen-answered');
+            if (!answered) {
+                // Temps écoulé → envoyer sélection actuelle (même vide)
+                answered = true;
+                hostConn.send({
+                    type:         'ANSWER',
+                    answer:       [...selectedAnswers],
+                    responseTime: seconds
+                });
+                showScreen('screen-answered');
+            }
         }
     }, 1000);
 }
 
-// ===== ENVOYER RÉPONSE =====
-
-function sendAnswer(answerIndex) {
-    clearInterval(timerInterval);
-
-    const responseTime = Date.now() - startTime;
-
-    hostConn.send({
-        type: 'ANSWER',
-        answer: answerIndex,
-        time: responseTime
-    });
-
-    disableButtons();
-    showScreen('screen-answered');
-}
-
-function disableButtons() {
-    for (let i = 0; i < 4; i++) {
-        const btn = document.getElementById(`btn-${i}`);
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-    }
-}
-
-// ===== RÉSULTAT DE LA QUESTION =====
+// ===== RÉSULTAT D'UNE QUESTION =====
 
 function showQuestionResult(data) {
     showScreen('screen-question-result');
 
     const resultIcon = document.getElementById('result-icon');
     const resultText = document.getElementById('result-text');
-    const pointsGained = document.getElementById('points-gained');
+    const pointsEl   = document.getElementById('points-gained');
 
     if (data.wasCorrect) {
         resultIcon.textContent = '✅';
         resultText.textContent = 'Bonne réponse !';
-        pointsGained.textContent = `+${data.points} pts`;
-        pointsGained.style.color = '#2ecc71';
+        pointsEl.textContent   = `+${data.points} pts`;
+        pointsEl.style.color   = '#2ecc71';
     } else {
         resultIcon.textContent = '❌';
         resultText.textContent = `Mauvaise réponse... C'était : ${data.correctText}`;
-        pointsGained.textContent = '+0 pts';
-        pointsGained.style.color = '#e74c3c';
+        pointsEl.textContent   = '+0 pts';
+        pointsEl.style.color   = '#e74c3c';
     }
 
     playerScore = data.totalScore;
@@ -197,20 +217,20 @@ function showQuestionResult(data) {
 function showGameOver(data) {
     showScreen('screen-final');
 
-    const myRank = data.rankings.find(r => r.name === playerName);
-    const finalRank = document.getElementById('player-final-rank');
+    const myRank   = data.rankings.find(r => r.name === playerName);
+    const finalDiv = document.getElementById('player-final-rank');
 
     if (myRank) {
         const medals = ['🥇', '🥈', '🥉'];
-        const medal = medals[myRank.rank - 1] || `#${myRank.rank}`;
+        const medal  = medals[myRank.rank - 1] || `#${myRank.rank}`;
 
-        finalRank.innerHTML = `
-            <div style="font-size: 3rem; margin-bottom: 15px">${medal}</div>
-            <div style="font-size: 1.5rem; font-weight: bold">${playerName}</div>
-            <div style="font-size: 1.2rem; color: #667eea; margin-top: 10px">
+        finalDiv.innerHTML = `
+            <div style="font-size:3rem;margin-bottom:15px">${medal}</div>
+            <div style="font-size:1.5rem;font-weight:bold">${playerName}</div>
+            <div style="font-size:1.2rem;color:#667eea;margin-top:10px">
                 ${myRank.score} points
             </div>
-            <div style="color: #aaa; margin-top: 5px">
+            <div style="color:#aaa;margin-top:5px">
                 ${myRank.rank}ème sur ${data.rankings.length} joueurs
             </div>
         `;
