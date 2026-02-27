@@ -352,12 +352,7 @@ function processAnswer(peerId, answerIndex, responseTime) {
 
     let points = 0;
     if (isCorrect) {
-        const maxTime = q.timer * 1000;
-        const maxPts  = q.points;
-        const minPts  = Math.round(maxPts * 0.1);
-        points = Math.round(minPts + (maxPts - minPts) * (1 - responseTime / maxTime));
-        points = Math.max(points, minPts);
-        points = Math.min(points, maxPts);
+        points = q.points;
     }
 
     players[peerId].lastAnswer  = answerIndex;
