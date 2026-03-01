@@ -17,10 +17,29 @@
         </div>
     </div>
 
-    <!-- ÉCRAN 2 : Attente -->
+    <!-- ÉCRAN 2 : Choix avatar -->
+    <div id="screen-avatar" class="screen">
+        <div class="center-box">
+            <h2>Choisis ton avatar</h2>
+            <div class="avatar-grid">
+                <img src="img/avatars/avatar1.png" class="avatar-option selected" data-avatar="img/avatars/avatar1.png">
+                <img src="img/avatars/avatar2.png" class="avatar-option" data-avatar="img/avatars/avatar2.png">
+                <img src="img/avatars/avatar3.png" class="avatar-option" data-avatar="img/avatars/avatar3.png">
+                <img src="img/avatars/avatar4.png" class="avatar-option" data-avatar="img/avatars/avatar4.png">
+                <img src="img/avatars/avatar5.png" class="avatar-option" data-avatar="img/avatars/avatar5.png">
+                <img src="img/avatars/avatar6.png" class="avatar-option" data-avatar="img/avatars/avatar6.png">
+                <img src="img/avatars/avatar7.png" class="avatar-option" data-avatar="img/avatars/avatar7.png">
+            </div>
+            <button id="confirm-avatar-btn" class="btn-primary" style="margin-top:25px">
+                Confirmer ✔
+            </button>
+        </div>
+    </div>
+
+    <!-- ÉCRAN 3 : Attente -->
     <div id="screen-wait" class="screen">
         <div class="center-box">
-            <div class="player-avatar">😊</div>
+            <img id="player-avatar-display" src="img/avatars/avatar1.png" class="player-avatar-img">
             <h2 id="player-name-display">Joueur</h2>
             <p>Tu es connecté ! En attente du début...</p>
             <div class="waiting-dots">
@@ -29,9 +48,8 @@
         </div>
     </div>
 
-    <!-- ÉCRAN 3 : Question -->
+    <!-- ÉCRAN 4 : Question -->
     <div id="screen-play" class="screen">
-
         <div class="player-header">
             <span id="player-score-display">0 pts</span>
             <div class="player-timer" id="player-timer">20</div>
@@ -60,51 +78,49 @@
             </button>
         </div>
 
-        <!-- Bouton Valider -->
-        <div style="display:flex; justify-content:center; margin-top:20px;">
-            <button id="validate-btn" onclick="validateAnswers()">
-                ✅ Valider ma sélection
+        <div style="display:flex;justify-content:center;margin-top:20px;">
+            <button id="validate-btn" class="btn-validate" onclick="validateAnswers()"
+                    style="display:none;">
+                ✔ Valider
             </button>
         </div>
-
     </div>
 
-    <!-- ÉCRAN 4 : Réponse envoyée -->
+    <!-- ÉCRAN 5 : Réponse envoyée -->
     <div id="screen-answered" class="screen">
         <div class="center-box">
-            <div id="answer-feedback" class="answer-feedback">
-                <div class="feedback-icon">⏳</div>
-                <h2>Réponse envoyée !</h2>
-                <p>En attente des autres joueurs...</p>
+            <div style="font-size:4rem">⏳</div>
+            <h2>Réponse envoyée !</h2>
+            <p>En attente des autres joueurs...</p>
+            <div class="waiting-dots">
+                <span></span><span></span><span></span>
             </div>
         </div>
     </div>
 
-    <!-- ÉCRAN 5 : Résultat de la question -->
+    <!-- ÉCRAN 6 : Résultat question -->
     <div id="screen-question-result" class="screen">
         <div class="center-box">
-            <div id="result-icon" class="result-icon">✅</div>
+            <div id="result-icon" style="font-size:5rem">✅</div>
             <h2 id="result-text">Bonne réponse !</h2>
-            <div class="points-gained" id="points-gained">+800 pts</div>
-            <div class="total-score">
-                Score total : <span id="total-score-display">800</span> pts
-            </div>
+            <div id="points-gained" style="font-size:2rem;font-weight:bold;margin:15px 0">+500 pts</div>
+            <p>Score total : <strong id="total-score-display">0</strong> pts</p>
         </div>
     </div>
 
-    <!-- ÉCRAN 6 : Classement final -->
+    <!-- ÉCRAN 7 : Fin de partie -->
     <div id="screen-final" class="screen">
         <div class="center-box">
             <h1>🏆 Partie terminée !</h1>
-            <div id="player-final-rank" class="final-rank"></div>
-            <button onclick="window.location.href='index.html'" class="btn btn-green">
-                🏠 Accueil
+            <div id="player-final-rank"></div>
+            <button class="btn-primary" style="margin-top:30px"
+                    onclick="window.location.href='index.html'">
+                Retour à l'accueil
             </button>
         </div>
     </div>
 
-    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script src="js/player.js"></script>
-
 </body>
 </html>

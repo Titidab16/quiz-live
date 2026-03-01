@@ -13,7 +13,6 @@
         <div class="host-container">
             <h1>📝 Crée ton Quiz</h1>
 
-            <!-- ✅ IMPORT / EXPORT -->
             <div class="import-export-bar">
                 <button onclick="exportQuiz()" class="btn btn-blue">
                     📤 Exporter le quiz
@@ -190,14 +189,55 @@
         </div>
     </div>
 
-    <!-- ÉCRAN 5 : Fin du jeu -->
+    <!-- ÉCRAN 5 : Fin du jeu + PODIUM -->
     <div id="screen-end" class="screen">
         <div class="end-container">
-            <h1>🏆 Fin du Quiz !</h1>
-            <div id="final-scores" class="final-scores"></div>
-            <button onclick="window.location.href='index.html'" class="btn btn-green btn-big">
+
+            <h1 style="font-size:2.8rem; margin-bottom:5px">🏆 Fin du Quiz !</h1>
+            <p style="color:#aaa; margin-bottom:40px">Voici le podium final</p>
+
+            <!-- PODIUM -->
+            <div class="podium-wrapper">
+
+                <!-- 2ème place -->
+                <div class="podium-player" id="podium-2">
+                    <div class="podium-crown">🥈</div>
+                    <img class="podium-avatar" id="podium-avatar-2" src="" alt="">
+                    <div class="podium-name" id="podium-name-2">—</div>
+                    <div class="podium-score" id="podium-score-2">0 pts</div>
+                    <div class="podium-block podium-block-2">2</div>
+                </div>
+
+                <!-- 1ère place -->
+                <div class="podium-player podium-first" id="podium-1">
+                    <div class="podium-crown">🥇</div>
+                    <img class="podium-avatar" id="podium-avatar-1" src="" alt="">
+                    <div class="podium-name" id="podium-name-1">—</div>
+                    <div class="podium-score" id="podium-score-1">0 pts</div>
+                    <div class="podium-block podium-block-1">1</div>
+                </div>
+
+                <!-- 3ème place -->
+                <div class="podium-player" id="podium-3">
+                    <div class="podium-crown">🥉</div>
+                    <img class="podium-avatar" id="podium-avatar-3" src="" alt="">
+                    <div class="podium-name" id="podium-name-3">—</div>
+                    <div class="podium-score" id="podium-score-3">0 pts</div>
+                    <div class="podium-block podium-block-3">3</div>
+                </div>
+
+            </div>
+
+            <!-- Classement complet -->
+            <div class="full-ranking">
+                <h3 style="margin-bottom:15px; color:#aaa">Classement complet</h3>
+                <div id="final-scores" class="final-scores"></div>
+            </div>
+
+            <button onclick="window.location.href='index.html'" class="btn btn-green btn-big" style="margin-top:30px">
                 🏠 Retour à l'accueil
             </button>
+
         </div>
     </div>
 

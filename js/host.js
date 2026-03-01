@@ -19,7 +19,6 @@ function addQuestion() {
     const timer  = parseInt(document.getElementById('q-timer').value);
     const points = parseInt(document.getElementById('q-points').value) || 100;
 
-    // Lire les checkboxes
     const checked = [...document.querySelectorAll('input[name="correct"]:checked')]
         .map(cb => parseInt(cb.value));
 
@@ -39,7 +38,7 @@ function addQuestion() {
     questions.push({
         text,
         answers: [a0, a1, a2, a3],
-        correct: checked,   // tableau ex: [0, 2]
+        correct: checked,
         timer,
         points
     });
@@ -122,7 +121,6 @@ function importQuiz(event) {
                 throw new Error('Format invalide');
             }
 
-            // Normaliser correct en tableau
             data.questions.forEach(q => {
                 if (!Array.isArray(q.correct)) {
                     q.correct = [q.correct];
@@ -184,7 +182,7 @@ function setupConnection(conn) {
 function handleMessage(conn, data) {
     switch (data.type) {
         case 'JOIN':
-            addPlayer(conn, data.name);
+            addPlayer(conn, data.name, data.avatar);
             break;
         case 'ANSWER':
             processAnswer(conn.peer, data.answer, data.responseTime);
@@ -192,9 +190,11 @@ function handleMessage(conn, data) {
     }
 }
 
-function addPlayer(conn, name) {
+function addPlayer(conn, name, avatar) {
     players[conn.peer] = {
         name,
+        avatar:      avatar || 'img/avatars/avatar1.png',
+        conn,
         score:       0,
         lastAnswer:  null,
         lastCorrect: false,
@@ -220,8 +220,12 @@ function updatePlayersList() {
 
     list.forEach(p => {
         const div = document.createElement('div');
-        div.className   = 'player-chip';
-        div.textContent = p.name;
+        div.className = 'player-chip';
+        div.innerHTML = `
+            <img src="${p.avatar}" alt="" 
+                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #667eea;">
+            <span>${p.name}</span>
+        `;
         grid.appendChild(div);
     });
 }
@@ -240,7 +244,6 @@ function launchGame() {
 function showQuestion() {
     answersReceived = 0;
 
-    // Reset lastAnswer de chaque joueur
     Object.values(players).forEach(p => {
         p.lastAnswer  = null;
         p.lastCorrect = false;
@@ -251,10 +254,10 @@ function showQuestion() {
 
     showScreen('screen-question');
 
-    document.getElementById('q-counter').textContent      = `Question ${currentQuestion + 1}/${questions.length}`;
+    document.getElementById('q-counter').textContent       = `Question ${currentQuestion + 1}/${questions.length}`;
     document.getElementById('current-question').textContent = q.text;
     document.getElementById('current-q-points').textContent = q.points;
-    document.getElementById('q-score-count').textContent   = `0/${Object.keys(players).length} réponses`;
+    document.getElementById('q-score-count').textContent    = `0/${Object.keys(players).length} réponses`;
 
     for (let i = 0; i < 4; i++) {
         document.getElementById(`host-a-${i}`).textContent = q.answers[i];
@@ -307,10 +310,8 @@ function processAnswer(peerId, answerArray, responseTime) {
 
     const q = questions[currentQuestion];
 
-    // Normaliser en tableau
     const answers = Array.isArray(answerArray) ? answerArray : [answerArray];
 
-    // Correct si même contenu peu importe l'ordre
     const correctSorted = [...q.correct].sort().join(',');
     const answerSorted  = [...answers].sort().join(',');
     const isCorrect     = correctSorted === answerSorted;
@@ -324,7 +325,6 @@ function processAnswer(peerId, answerArray, responseTime) {
 
     answersReceived++;
 
-    // Incrémenter compteur pour chaque réponse choisie
     answers.forEach(i => {
         const countEl = document.getElementById(`count-${i}`);
         if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
@@ -345,7 +345,6 @@ function endQuestion() {
     const q = questions[currentQuestion];
     const correctLabels = q.correct.map(i => q.answers[i]).join(', ');
 
-    // Envoyer résultat à chaque joueur
     Object.entries(players).forEach(([peerId, player]) => {
         const conn = connections.find(c => c.peer === peerId);
         if (conn && conn.open) {
@@ -372,9 +371,9 @@ function showResults() {
     scoreboard.innerHTML = '';
 
     sorted.forEach((player, index) => {
-        const row   = document.createElement('div');
+        const row     = document.createElement('div');
         row.className = 'score-row';
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+        const medal   = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
 
         const pointsThisRound = player.lastPoints > 0
             ? `<span class="points-round green">+${player.lastPoints}</span>`
@@ -382,6 +381,8 @@ function showResults() {
 
         row.innerHTML = `
             <span class="rank-num">${medal}</span>
+            <img src="${player.avatar}" alt=""
+                 style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #667eea;">
             <span class="player-name">${player.name}</span>
             ${pointsThisRound}
             <span class="player-pts">${player.score} pts</span>
@@ -391,7 +392,7 @@ function showResults() {
 
     const nextBtn = document.getElementById('next-btn');
     nextBtn.textContent = currentQuestion >= questions.length - 1
-        ? '🏆 Voir le résultat final'
+        ? '🏆 Voir le podium final'
         : `➡️ Question ${currentQuestion + 2}`;
 }
 
@@ -404,34 +405,73 @@ function nextQuestion() {
     }
 }
 
-// ===== FIN DU JEU =====
+// ===== FIN DU JEU + PODIUM =====
 
 function endGame() {
     showScreen('screen-end');
 
-    const sorted      = Object.values(players).sort((a, b) => b.score - a.score);
-    const finalScores = document.getElementById('final-scores');
-    finalScores.innerHTML = '';
+    const sorted = Object.values(players).sort((a, b) => b.score - a.score);
 
-    sorted.forEach((player, index) => {
-        const row     = document.createElement('div');
-        row.className = 'score-row';
-        const medal   = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-        row.innerHTML = `
-            <span class="rank-num">${medal}</span>
-            <span class="player-name">${player.name}</span>
-            <span class="player-pts">${player.score} pts</span>
-        `;
-        finalScores.appendChild(row);
+    // ── PODIUM (top 3) ──────────────────────────────────
+    [1, 2, 3].forEach(pos => {
+        const p        = sorted[pos - 1];
+        const block    = document.getElementById(`podium-${pos}`);
+        const nameEl   = document.getElementById(`podium-name-${pos}`);
+        const scoreEl  = document.getElementById(`podium-score-${pos}`);
+        const avatarEl = document.getElementById(`podium-avatar-${pos}`);
+
+        if (p) {
+            nameEl.textContent  = p.name;
+            scoreEl.textContent = p.score + ' pts';
+            avatarEl.src        = p.avatar || 'img/avatars/avatar1.png';
+            avatarEl.alt        = p.name;
+            block.style.display = 'flex';
+        } else {
+            block.style.display = 'none';
+        }
     });
 
-    const rankings = sorted.map((p, i) => ({
-        name:  p.name,
-        score: p.score,
-        rank:  i + 1
-    }));
+    // Animations décalées
+    setTimeout(() => document.getElementById('podium-1')?.classList.add('podium-animate'), 200);
+    setTimeout(() => document.getElementById('podium-2')?.classList.add('podium-animate'), 500);
+    setTimeout(() => document.getElementById('podium-3')?.classList.add('podium-animate'), 800);
 
-    broadcast({ type: 'GAME_OVER', rankings });
+    // ── CLASSEMENT COMPLET ───────────────────────────────
+    const container = document.getElementById('final-scores');
+    container.innerHTML = '';
+
+    sorted.forEach((p, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+        const div   = document.createElement('div');
+        div.className = 'final-score-row';
+        div.innerHTML = `
+            <span class="final-rank-medal">${medal}</span>
+            <img class="final-rank-avatar" 
+                 src="${p.avatar || 'img/avatars/avatar1.png'}" 
+                 alt="${p.name}">
+            <span class="final-rank-name">${p.name}</span>
+            <span class="final-rank-score">${p.score} pts</span>
+        `;
+        container.appendChild(div);
+    });
+
+    // ── ENVOYER GAME OVER aux joueurs ────────────────────
+    sorted.forEach((p, i) => {
+        const conn = connections.find(c => c.peer === Object.keys(players).find(k => players[k] === p));
+        if (conn && conn.open) {
+            conn.send({
+                type   : 'GAME_OVER',
+                rank   : i + 1,
+                total  : sorted.length,
+                score  : p.score,
+                scores : sorted.map(x => ({
+                    name   : x.name,
+                    score  : x.score,
+                    avatar : x.avatar
+                }))
+            });
+        }
+    });
 }
 
 // ===== UTILITAIRES =====
