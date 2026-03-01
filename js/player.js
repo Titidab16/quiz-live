@@ -30,7 +30,8 @@ window.onload = () => {
 
     document.getElementById('confirm-avatar-btn').addEventListener('click', () => {
         if (hostConn && hostConn.open) {
-            hostConn.send({ type: 'AVATAR', avatar: selectedAvatar });
+            // Envoie l'avatar mis à jour à l'hôte
+            hostConn.send({ type: 'UPDATE_AVATAR', avatar: selectedAvatar });
         }
         document.getElementById('player-avatar-display').src = selectedAvatar;
         showScreen('screen-wait');
@@ -43,7 +44,8 @@ window.onload = () => {
         hostConn = peer.connect('quiz-' + pin);
 
         hostConn.on('open', () => {
-            hostConn.send({ type: 'JOIN', name: playerName });
+            // Envoie le JOIN avec l'avatar par défaut
+            hostConn.send({ type: 'JOIN', name: playerName, avatar: selectedAvatar });
         });
 
         hostConn.on('data', handleHostMessage);
@@ -103,7 +105,7 @@ function showQuestion(data) {
         document.getElementById(`player-a-${i}`).textContent = data.answers[i];
     }
 
-    document.getElementById('validate-btn').style.display   = 'none';
+    document.getElementById('validate-btn').style.display       = 'none';
     document.getElementById('player-question-text').textContent = data.question;
     document.getElementById('player-score-display').textContent = `${playerScore} pts`;
 
@@ -222,12 +224,13 @@ function showQuestionResult(data) {
 function showGameOver(data) {
     showScreen('screen-final');
 
-    const myRank   = data.rankings.find(r => r.name === playerName);
+    const myRank   = data.scores.find(r => r.name === playerName);
+    const myRankIndex = data.scores.indexOf(myRank);
     const finalDiv = document.getElementById('player-final-rank');
 
     if (myRank) {
         const medals = ['🥇', '🥈', '🥉'];
-        const medal  = medals[myRank.rank - 1] || `#${myRank.rank}`;
+        const medal  = medals[myRankIndex] || `#${myRankIndex + 1}`;
 
         finalDiv.innerHTML = `
             <div style="font-size:3rem;margin-bottom:15px">${medal}</div>
@@ -237,7 +240,7 @@ function showGameOver(data) {
                 ${myRank.score} points
             </div>
             <div style="color:#aaa;margin-top:5px">
-                ${myRank.rank}ème sur ${data.rankings.length} joueurs
+                ${myRankIndex + 1}ème sur ${data.scores.length} joueurs
             </div>
         `;
     }

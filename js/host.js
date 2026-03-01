@@ -184,6 +184,13 @@ function handleMessage(conn, data) {
         case 'JOIN':
             addPlayer(conn, data.name, data.avatar);
             break;
+        case 'UPDATE_AVATAR':
+            // Met à jour l'avatar quand le joueur confirme son choix
+            if (players[conn.peer]) {
+                players[conn.peer].avatar = data.avatar;
+                updatePlayersList();
+            }
+            break;
         case 'ANSWER':
             processAnswer(conn.peer, data.answer, data.responseTime);
             break;
@@ -254,10 +261,10 @@ function showQuestion() {
 
     showScreen('screen-question');
 
-    document.getElementById('q-counter').textContent       = `Question ${currentQuestion + 1}/${questions.length}`;
-    document.getElementById('current-question').textContent = q.text;
-    document.getElementById('current-q-points').textContent = q.points;
-    document.getElementById('q-score-count').textContent    = `0/${Object.keys(players).length} réponses`;
+    document.getElementById('q-counter').textContent        = `Question ${currentQuestion + 1}/${questions.length}`;
+    document.getElementById('current-question').textContent  = q.text;
+    document.getElementById('current-q-points').textContent  = q.points;
+    document.getElementById('q-score-count').textContent     = `0/${Object.keys(players).length} réponses`;
 
     for (let i = 0; i < 4; i++) {
         document.getElementById(`host-a-${i}`).textContent = q.answers[i];
@@ -457,17 +464,18 @@ function endGame() {
 
     // ── ENVOYER GAME OVER aux joueurs ────────────────────
     sorted.forEach((p, i) => {
-        const conn = connections.find(c => c.peer === Object.keys(players).find(k => players[k] === p));
+        const peerId = Object.keys(players).find(k => players[k] === p);
+        const conn   = connections.find(c => c.peer === peerId);
         if (conn && conn.open) {
             conn.send({
-                type   : 'GAME_OVER',
-                rank   : i + 1,
-                total  : sorted.length,
-                score  : p.score,
-                scores : sorted.map(x => ({
-                    name   : x.name,
-                    score  : x.score,
-                    avatar : x.avatar
+                type  : 'GAME_OVER',
+                rank  : i + 1,
+                total : sorted.length,
+                score : p.score,
+                scores: sorted.map(x => ({
+                    name  : x.name,
+                    score : x.score,
+                    avatar: x.avatar
                 }))
             });
         }
