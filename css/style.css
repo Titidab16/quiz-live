@@ -866,3 +866,43 @@ body {
     color: #f1c40f;
     font-size: 1.1rem;
 }
+.qr-section {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    padding: 20px 30px;
+    margin: 20px auto 0;
+    display: inline-block;
+}
+
+.qr-section > p:first-child {
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+#qrcode {
+    background: white;
+    border-radius: 12px;
+    padding: 10px;
+    display: inline-block;
+}
+
+#qrcode img,
+#qrcode canvas {
+    display: block;
+    border-radius: 8px;
+}
+
+.qr-url {
+    font-size: 0.7rem !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    margin-top: 10px !important;
+    word-break: break-all;
+    max-width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+}

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuizLive 🎮</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
 </head>
 <body>
 
@@ -16,43 +18,26 @@
 
         <div class="home-cards">
 
-            <!-- Carte Rejoindre -->
             <div class="card card-join">
                 <div class="card-icon">🎯</div>
                 <h2>Rejoindre</h2>
                 <p>Entre le PIN de la partie</p>
                 <div class="pin-input-group">
-                    <input 
-                        type="text" 
-                        id="pin-input" 
-                        placeholder="PIN à 6 chiffres"
-                        maxlength="6"
-                    >
-                    <input 
-                        type="text" 
-                        id="name-input" 
-                        placeholder="Ton pseudo"
-                        maxlength="15"
-                    >
-                    <button onclick="joinGame()" class="btn btn-green">
-                        Rejoindre →
-                    </button>
+                    <input type="text" id="pin-input" placeholder="PIN à 6 chiffres" maxlength="6">
+                    <input type="text" id="name-input" placeholder="Ton pseudo" maxlength="15">
+                    <button onclick="joinGame()" class="btn btn-green">Rejoindre →</button>
                 </div>
             </div>
 
-            <!-- Carte Créer -->
             <div class="card card-host">
                 <div class="card-icon">➕</div>
                 <h2>Créer un Quiz</h2>
                 <p>Lance ta propre partie</p>
-                <a href="host.html" class="btn btn-orange">
-                    Créer →
-                </a>
+                <a href="host.html" class="btn btn-orange">Créer →</a>
             </div>
 
         </div>
 
-        <!-- Bandeau info système de points -->
         <div class="points-info-banner">
             <span>🏆</span>
             <span>Système de points : chaque question vaut un nombre de points défini par l'hôte !</span>
@@ -63,8 +48,16 @@
 
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <script>
+        // Détecter PIN dans l'URL (scan QR code)
+        const urlParams = new URLSearchParams(window.location.search);
+        const pinFromUrl = urlParams.get('pin');
+        if (pinFromUrl) {
+            document.getElementById('pin-input').value = pinFromUrl;
+            document.getElementById('name-input').focus();
+        }
+
         function joinGame() {
-            const pin = document.getElementById('pin-input').value.trim();
+            const pin  = document.getElementById('pin-input').value.trim();
             const name = document.getElementById('name-input').value.trim();
 
             if (pin.length !== 6) {
@@ -76,11 +69,9 @@
                 return;
             }
 
-            // Rediriger vers la page joueur
             window.location.href = `play.html?pin=${pin}&name=${encodeURIComponent(name)}`;
         }
 
-        // Permettre de valider avec Entrée
         document.getElementById('pin-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') joinGame();
         });

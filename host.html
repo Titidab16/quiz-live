@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hôte - QuizLive</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
 </head>
 <body>
 
@@ -14,19 +17,9 @@
             <h1>📝 Crée ton Quiz</h1>
 
             <div class="import-export-bar">
-                <button onclick="exportQuiz()" class="btn btn-blue">
-                    📤 Exporter le quiz
-                </button>
-                <label class="btn btn-purple" for="import-file">
-                    📥 Importer un quiz
-                </label>
-                <input 
-                    type="file" 
-                    id="import-file" 
-                    accept=".json"
-                    style="display:none"
-                    onchange="importQuiz(event)"
-                >
+                <button onclick="exportQuiz()" class="btn btn-blue">📤 Exporter le quiz</button>
+                <label class="btn btn-purple" for="import-file">📥 Importer un quiz</label>
+                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importQuiz(event)">
             </div>
 
             <div id="questions-list"></div>
@@ -34,12 +27,7 @@
             <div class="question-form">
                 <h3>➕ Ajouter une question</h3>
 
-                <input 
-                    type="text" 
-                    id="q-text" 
-                    placeholder="La question..."
-                    class="input-full"
-                >
+                <input type="text" id="q-text" placeholder="La question..." class="input-full">
 
                 <div class="answers-grid">
                     <input type="text" id="a-0" placeholder="▲ Réponse 1" class="answer-input red">
@@ -51,18 +39,10 @@
                 <div class="correct-select">
                     <label>✅ Bonnes réponses (plusieurs possibles) :</label>
                     <div class="correct-checkboxes">
-                        <label class="check-label red">
-                            <input type="checkbox" name="correct" value="0"> ▲ Réponse 1
-                        </label>
-                        <label class="check-label blue">
-                            <input type="checkbox" name="correct" value="1"> ♦ Réponse 2
-                        </label>
-                        <label class="check-label green">
-                            <input type="checkbox" name="correct" value="2"> ● Réponse 3
-                        </label>
-                        <label class="check-label yellow">
-                            <input type="checkbox" name="correct" value="3"> ■ Réponse 4
-                        </label>
+                        <label class="check-label red"><input type="checkbox" name="correct" value="0"> ▲ Réponse 1</label>
+                        <label class="check-label blue"><input type="checkbox" name="correct" value="1"> ♦ Réponse 2</label>
+                        <label class="check-label green"><input type="checkbox" name="correct" value="2"> ● Réponse 3</label>
+                        <label class="check-label yellow"><input type="checkbox" name="correct" value="3"> ■ Réponse 4</label>
                     </div>
                 </div>
 
@@ -85,21 +65,12 @@
                         <button type="button" class="point-btn" data-points="1000" onclick="selectPoints(this)">1000</button>
                     </div>
                     <div class="points-custom">
-                        <input 
-                            type="number" 
-                            id="q-points" 
-                            value="100" 
-                            min="1" 
-                            max="9999"
-                            placeholder="Valeur personnalisée"
-                        >
+                        <input type="number" id="q-points" value="100" min="1" max="9999" placeholder="Valeur personnalisée">
                         <span>pts</span>
                     </div>
                 </div>
 
-                <button onclick="addQuestion()" class="btn btn-orange">
-                    ➕ Ajouter la question
-                </button>
+                <button onclick="addQuestion()" class="btn btn-orange">➕ Ajouter la question</button>
             </div>
 
             <button onclick="startLobby()" class="btn btn-green btn-big" id="start-btn" disabled>
@@ -108,7 +79,7 @@
         </div>
     </div>
 
-    <!-- ÉCRAN 2 : Salle d'attente -->
+    <!-- ÉCRAN 2 : Lobby -->
     <div id="screen-lobby" class="screen">
         <div class="lobby-container">
             <h1>🎮 Salle d'attente</h1>
@@ -117,35 +88,32 @@
                 <p>PIN de la partie :</p>
                 <div class="pin-number" id="pin-display">------</div>
                 <p class="pin-hint">Les joueurs entrent ce code sur la page d'accueil</p>
+
+                <div class="qr-section">
+                    <p>📱 Ou scanner pour rejoindre :</p>
+                    <div id="qrcode"></div>
+                    <p class="qr-url" id="qr-url-text"></p>
+                </div>
             </div>
 
             <div class="players-section">
-                <h3>👥 Joueurs connectés (<span id="player-count">0</span>)</h3>
+                <h3>👥 Joueurs connectés : <span id="player-count">0</span></h3>
                 <div id="players-grid" class="players-grid"></div>
             </div>
 
             <button onclick="launchGame()" class="btn btn-green btn-big">
-                ▶️ Démarrer le quiz !
+                ▶️ Démarrer le quiz
             </button>
         </div>
     </div>
 
     <!-- ÉCRAN 3 : Question en cours -->
     <div id="screen-question" class="screen">
-        <div class="question-screen">
-
+        <div class="question-container">
             <div class="question-header">
-                <span id="q-counter">Question 1/5</span>
-                <div class="timer-circle">
-                    <span id="timer-display">20</span>
-                </div>
-                <span id="q-score-count">0 réponses</span>
-            </div>
-
-            <div class="question-points-badge">
-                <span>🏆</span>
-                <span id="current-q-points">100</span>
-                <span>pts</span>
+                <span id="q-counter">Question 1/1</span>
+                <span id="host-timer" class="host-timer">20</span>
+                <span>🏆 <span id="current-q-points">100</span> pts</span>
             </div>
 
             <div class="question-box">
@@ -175,6 +143,9 @@
                 </div>
             </div>
 
+            <div class="answers-stats">
+                <span id="q-score-count">0/0 réponses</span>
+            </div>
         </div>
     </div>
 
@@ -196,10 +167,8 @@
             <h1 style="font-size:2.8rem; margin-bottom:5px">🏆 Fin du Quiz !</h1>
             <p style="color:#aaa; margin-bottom:40px">Voici le podium final</p>
 
-            <!-- PODIUM -->
             <div class="podium-wrapper">
 
-                <!-- 2ème place -->
                 <div class="podium-player" id="podium-2">
                     <div class="podium-crown">🥈</div>
                     <img class="podium-avatar" id="podium-avatar-2" src="" alt="">
@@ -208,7 +177,6 @@
                     <div class="podium-block podium-block-2">2</div>
                 </div>
 
-                <!-- 1ère place -->
                 <div class="podium-player podium-first" id="podium-1">
                     <div class="podium-crown">🥇</div>
                     <img class="podium-avatar" id="podium-avatar-1" src="" alt="">
@@ -217,7 +185,6 @@
                     <div class="podium-block podium-block-1">1</div>
                 </div>
 
-                <!-- 3ème place -->
                 <div class="podium-player" id="podium-3">
                     <div class="podium-crown">🥉</div>
                     <img class="podium-avatar" id="podium-avatar-3" src="" alt="">
@@ -228,7 +195,6 @@
 
             </div>
 
-            <!-- Classement complet -->
             <div class="full-ranking">
                 <h3 style="margin-bottom:15px; color:#aaa">Classement complet</h3>
                 <div id="final-scores" class="final-scores"></div>

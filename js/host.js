@@ -152,6 +152,19 @@ function startLobby() {
     const PIN = Math.floor(100000 + Math.random() * 900000).toString();
     document.getElementById('pin-display').textContent = PIN;
 
+    // Générer le QR code
+    const joinUrl = `https://rapidquiz.cc/?pin=${PIN}`;
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), {
+        text: joinUrl,
+        width: 160,
+        height: 160,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+    document.getElementById('qr-url-text').textContent = joinUrl;
+
     peer = new Peer('quiz-' + PIN);
 
     peer.on('open', () => {
@@ -170,6 +183,7 @@ function startLobby() {
         });
     });
 }
+
 
 function setupConnection(conn) {
     conn.on('data', (data) => handleMessage(conn, data));
