@@ -243,10 +243,10 @@ function updatePlayersList() {
         const div = document.createElement('div');
         div.className = 'player-chip';
         div.innerHTML = `
-            <img src="${p.avatar}" alt="" 
-                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #667eea;">
+            <img src="${p.avatar}" alt="">
             <span>${p.name}</span>
         `;
+
         grid.appendChild(div);
     });
 }
